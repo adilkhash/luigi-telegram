@@ -42,15 +42,16 @@ class LuigiTelegramNotification(object):
             task, "".join(traceback.format_exception(type(exception), exception, exception.__traceback__)))
 
     def format_success(self, task):
-        return 'Task {}, Status: *Success*'.format(task)
+        return 'Task *{}*, Status: *Success*\n'.format(task)
 
     def notify(self):
         logger.debug('Total failed tasks {}'.format(len(self._failed_tasks)))
         logger.debug('Total successful tasks {}'.format(len(self._succeeded_tasks)))
-        payload = []
-        if self._failed_only or self._failed_tasks:
-            for failed in self._failed_tasks:
-                payload.append(self.format_failure(*failed))
+
+        payload = [self.format_failure(*failed) for failed in self._failed_tasks]
+        if not self._failed_only:
+            payload += [self.format_success(task) for task in self._succeeded_tasks]
+
         if payload:
             self.bot.send_message(''.join(payload), self._chat_id)
 
