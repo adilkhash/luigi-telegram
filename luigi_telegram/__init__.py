@@ -1,3 +1,4 @@
+import time
 import logging
 import traceback
 
@@ -53,7 +54,16 @@ class LuigiTelegramNotification(object):
             payload += [self.format_success(task) for task in self._succeeded_tasks]
 
         if payload:
-            self.bot.send_message(''.join(payload), self._chat_id)
+            bucket = []
+            for i, msg in enumerate(payload):
+                if i == 5:
+                    self.bot.send_message(''.join(bucket), self._chat_id)
+                    bucket = [msg]
+                    time.sleep(0.666)
+                else:
+                    bucket.append(msg)
+            if bucket:
+                self.bot.send_message(''.join(bucket), self._chat_id)
 
     def __enter__(self):
         self.set_handlers()
